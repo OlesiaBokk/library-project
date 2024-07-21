@@ -2,8 +2,9 @@ package ru.itgirl.library_project.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.itgirl.library_project.dto.*;
-import ru.itgirl.library_project.model.entity.Author;
+import ru.itgirl.library_project.dto.GenreAuthorDto;
+import ru.itgirl.library_project.dto.GenreBookDto;
+import ru.itgirl.library_project.dto.GenreDto;
 import ru.itgirl.library_project.model.entity.Genre;
 import ru.itgirl.library_project.repository.GenreRepository;
 
@@ -17,6 +18,12 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public GenreDto getGenreById(Long id) {
         Genre genre = genreRepository.findById(id).orElseThrow();
+        return convertToDto(genre);
+    }
+
+    @Override
+    public GenreDto getGenreByName(String name) {
+        Genre genre = genreRepository.findGenreByName(name).orElseThrow();
         return convertToDto(genre);
     }
 
