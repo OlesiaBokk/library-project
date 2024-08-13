@@ -5,6 +5,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.itgirl.library_project.dto.AuthorCreateDto;
@@ -15,29 +18,57 @@ import ru.itgirl.library_project.model.entity.Author;
 import ru.itgirl.library_project.repository.AuthorRepository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthorServiceImpl implements AuthorService {
+    private static final Logger log = LoggerFactory.getLogger(AuthorServiceImpl.class);
     private final AuthorRepository authorRepository;
 
     @Override
     public AuthorDto getAuthorById(Long id) {
-        Author author = authorRepository.findById(id).orElseThrow();
-        return convertToDto(author);
+        log.info("Try to find author by id {}", id);
+        Optional<Author> author = authorRepository.findById(id);
+        if (author.isPresent()) {
+            AuthorDto authorDto = convertEntityToDto(author.get());
+            log.info("Author: {}", authorDto.toString());
+            return authorDto;
+        } else {
+            log.error("Author with id {} not found", id);
+            throw new NoSuchElementException("No value present");
+        }
     }
 
     @Override
     public AuthorDto getAuthorByName(String name) {
-        Author author = authorRepository.findAuthorByName(name).orElseThrow();
-        return convertToDto(author);
+        log.info("Try to find author by name {}", name);
+        Optional<Author> author = authorRepository.findAuthorByName(name);
+        if (author.isPresent()) {
+            AuthorDto authorDto = convertEntityToDto(author.get());
+            log.info("Author: {}", authorDto.toString());
+            return authorDto;
+        } else {
+            log.error("Author with name {} not found", name);
+            throw new NoSuchElementException("No value present");
+        }
     }
 
     @Override
     public AuthorDto getAuthorByNameV2(String name) {
-        Author author = authorRepository.findAuthorByNameBySql(name).orElseThrow();
-        return convertToDto(author);
+        log.info("Try to find author by nameV2 {}", name);
+        Optional<Author> author = authorRepository.findAuthorByNameBySql(name);
+        if (author.isPresent()) {
+            AuthorDto authorDto = convertEntityToDto(author.get());
+            log.info("Author: {}", authorDto.toString());
+            return authorDto;
+        } else {
+            log.error("Author with name {} not found", name);
+            throw new NoSuchElementException("No value present");
+        }
     }
 
     @Override
@@ -55,24 +86,48 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorDto createAuthor(AuthorCreateDto authorCreateDto) {
-        Author author = authorRepository.save(convertDtoToEntity(authorCreateDto));
-        AuthorDto authorDto = convertEntityToDto(author);
-        return authorDto;
+        log.info("Try to create author with data {}", authorCreateDto.toString());
+        try {
+            Author author = authorRepository.save(convertDtoToEntity(authorCreateDto));
+            AuthorDto authorDto = convertEntityToDto(author);
+            log.info("Author with data {} successfully created", authorDto.toString());
+            return authorDto;
+        } catch (Exception e) {
+            log.error("Failed to create author with data {}", authorCreateDto.toString());
+            throw new RuntimeException("Failed to create author", e);
+        }
     }
 
     @Override
     public AuthorDto updateAuthor(AuthorUpdateDto authorUpdateDto) {
-        Author author = authorRepository.findById(authorUpdateDto.getId()).orElseThrow();
-        author.setName(authorUpdateDto.getName());
-        author.setSurname(authorUpdateDto.getSurname());
-        Author savedAuthor = authorRepository.save(author);
-        AuthorDto authorDto = convertEntityToDto(savedAuthor);
-        return authorDto;
+        log.info("Try to update author with id {}", authorUpdateDto.getId());
+        try {
+            Author author = authorRepository.findById(authorUpdateDto.getId()).orElseThrow();
+            author.setName(authorUpdateDto.getName());
+            author.setSurname(authorUpdateDto.getSurname());
+            Author savedAuthor = authorRepository.save(author);
+            AuthorDto authorDto = convertEntityToDto(savedAuthor);
+            log.info("Successfully updated author with data {}", savedAuthor);
+            return authorDto;
+        } catch (Exception e) {
+            log.error("Failed to update author with data {}", authorUpdateDto.toString());
+            throw new RuntimeException("Failed to update author", e);
+        }
+
     }
 
     @Override
     public void deleteAuthor(Long id) {
-        authorRepository.deleteById(id);
+        log.info("Try to delete author with id {}", id);
+        Optional<Author> author = authorRepository.findById(id);
+        if (author.isPresent()) {
+            log.info("Found author with id {}", id);
+            authorRepository.deleteById(id);
+            log.info("Deleted author with id {}", id);
+        } else {
+            log.error("Failed to find author with id {}", id);
+            throw new NoSuchElementException("No value present");
+        }
     }
 
     @Override

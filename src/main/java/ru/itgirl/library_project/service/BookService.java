@@ -7,6 +7,8 @@ import ru.itgirl.library_project.dto.BookUpdateDto;
 import java.util.List;
 
 public interface BookService {
+    BookDto getBookById(Long id);
+
     BookDto getByNameV1(String name);
 
     BookDto getByNameV2(String name);
