@@ -105,9 +105,9 @@ public class BookServiceImpl implements BookService {
     public BookDto updateBook(BookUpdateDto bookUpdateDto) {
         log.info("Try to update book with id {}", bookUpdateDto.getId());
         try {
-            Book book = bookRepository.findBookById(bookUpdateDto.getId()).orElseThrow();
+            Book book = bookRepository.findById(bookUpdateDto.getId()).orElseThrow();
             book.setName(bookUpdateDto.getName());
-            book.setGenre(genreRepository.findGenreByName(bookUpdateDto.getGenre()).orElseThrow());
+            book.setGenre(genreRepository.findByName(bookUpdateDto.getGenre()).orElseThrow());
             Book savedBook = bookRepository.save(book);
             BookDto bookDto = convertEntityToDto(savedBook);
             log.info("Successfully updated book with data {}", savedBook);
@@ -161,7 +161,7 @@ public class BookServiceImpl implements BookService {
     }
 
     private Book convertDtoToEntity(BookCreateDto bookCreateDto) {
-        Genre genre = genreRepository.findGenreByName(bookCreateDto.getGenre()).orElseThrow();
+        Genre genre = genreRepository.findByName(bookCreateDto.getGenre()).orElseThrow();
         return Book.builder()
                 .name(bookCreateDto.getName())
                 .genre(genre)

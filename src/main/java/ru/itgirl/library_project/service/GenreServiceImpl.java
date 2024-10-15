@@ -37,7 +37,7 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public GenreDto getGenreByName(String name) {
         log.info("Try to find genre by name {}", name);
-        Optional<Genre> genre = genreRepository.findGenreByName(name);
+        Optional<Genre> genre = genreRepository.findByName(name);
         if(genre.isPresent()){
             GenreDto genreDto = convertEntityToDto(genre.get());
             log.info("Genre: {}", genreDto.toString());
